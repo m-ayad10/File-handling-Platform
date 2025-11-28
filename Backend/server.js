@@ -16,7 +16,7 @@ const PORT=process.env.PORT
 app.use(cookieParser())
 
 app.use(cors({
-    origin: "https://file-processing-system.onrender.com",
+    origin: ["https://file-processing-system.onrender.com","http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
