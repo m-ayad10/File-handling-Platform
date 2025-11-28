@@ -2,62 +2,132 @@ import { useNavigate } from "react-router-dom";
 import "./style.css";
 import { useState } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 
 function LoginForm() {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
   const SERVER_URL=import.meta.env.VITE_SERVER_URL
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!name.trim() || !password.trim()) {
-      setError("Please fill all fields");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
+  e.preventDefault();
+  
+  // Validation toast
+  if (!name.trim() || !password.trim()) {
+    toast.error("Please fill all fields", {
+      duration: 3000,
+      position: "top-center",
+      style: {
+        background: '#FEF2F2',
+        color: '#DC2626',
+        border: '1px solid #FECACA',
+        borderRadius: '12px',
+        fontSize: '14px',
+        fontWeight: '500',
+      },
+      iconTheme: {
+        primary: '#DC2626',
+        secondary: '#FFF',
+      },
+    });
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        `${SERVER_URL}/login`,
-        { userName: name, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+  // Show loading toast for API call
+  const loadingToast = toast.loading('Signing you in...', {
+    position: "top-center",
+  });
 
-      const { success, message } = response.data;
-      if (success) {
-        Swal.fire({
-          icon: "success",
-          title: message,
-          customClass: {
-            popup: "custom-swal-popup",
-          },
-        });
+  try {
+    const response = await axios.post(
+      `${SERVER_URL}/login `,
+      { userName: name, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+
+    const { success, message } = response.data;
+    
+    // Dismiss loading toast
+    toast.dismiss(loadingToast);
+
+    if (success) {
+      toast.success(message, {
+        duration: 4000,
+        position: "top-center",
+        style: {
+          background: '#10B981',
+          color: '#fff',
+          borderRadius: '12px',
+          fontSize: '16px',
+          fontWeight: '500',
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+        },
+        iconTheme: {
+          primary: '#FFF',
+          secondary: '#10B981',
+        },
+      });
+      
+      // Small delay before navigation to let user see the success message
+      setTimeout(() => {
         navigate(`/dashboard/${name}`);
-      } else {
-        setError(message);
-      }
-    } catch (err) {
-      const error = err as any; // OR use AxiosError from axios types
-      console.error("Login error:", error.response?.data || error.message);
-
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Something went wrong");
-      }
-
-      setTimeout(() => setError(""), 3000);
+      }, 1000);
+    } else {
+      toast.error(message, {
+        duration: 4000,
+        position: "top-center",
+        style: {
+          background: '#FEF2F2',
+          color: '#DC2626',
+          border: '1px solid #FECACA',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: '500',
+        },
+      });
     }
-  };
+  } catch (err) {
+    const error = err as any;
+    console.error("Login error:", error.response?.data || error.message);
 
+    // Dismiss loading toast
+    toast.dismiss(loadingToast);
+
+    if (error.response?.data?.message) {
+      toast.error(error.response.data.message, {
+        duration: 4000,
+        position: "top-center",
+        style: {
+          background: '#FEF2F2',
+          color: '#DC2626',
+          border: '1px solid #FECACA',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: '500',
+        },
+      });
+    } else {
+      toast.error("Something went wrong. Please try again.", {
+        duration: 4000,
+        position: "top-center",
+        style: {
+          background: '#FEF2F2',
+          color: '#DC2626',
+          border: '1px solid #FECACA',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: '500',
+        },
+      });
+    }
+  }
+};
   return (
      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 flex items-center justify-center p-4">
       {/* Main Login Card */}

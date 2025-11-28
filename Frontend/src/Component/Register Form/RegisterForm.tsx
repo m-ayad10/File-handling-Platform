@@ -9,7 +9,7 @@ function RegisterForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-    const SERVER_URL=import.meta.env.VITE_SERVER_URL
+  const SERVER_URL=import.meta.env.VITE_SERVER_URL
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

@@ -1,13 +1,33 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Navbar() {
   const navigate = useNavigate();
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+  const [user, setUser] = useState(false);
+
+  useEffect(() => {
+    const validate = async () => {
+      try {
+        const response = await axios.get(`${SERVER_URL}/verify-token`, {
+          withCredentials: true,
+        });
+        const { success }: { success: boolean } = response.data;
+        setUser(success);
+      } catch (error) {
+        console.error(error);
+        setUser(false);
+      }
+    };
+    validate();
+  }, []);
   return (
     <nav className="w-full bg-white/10 backdrop-blur-md shadow-2xl border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div  className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-20">
           {/* Logo and Brand */}
-          <div  className="flex cursor-pointer items-center space-x-4">
+          <div className="flex cursor-pointer items-center space-x-4">
             {/* Cloud Icon with gradient */}
             <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200">
               <svg
@@ -21,15 +41,19 @@ function Navbar() {
 
             {/* Brand Name with enhanced styling */}
             <div className="flex flex-col">
-              <h1 onClick={() => navigate("/")} className="text-2xl hover:cursor-pointer sm:text-3xl lg:text-4xl font-black text-gray-800 tracking-tight drop-shadow-sm">
+              <h1
+                onClick={() => navigate("/")}
+                className="text-2xl hover:cursor-pointer sm:text-3xl lg:text-4xl font-black text-gray-800 tracking-tight drop-shadow-sm"
+              >
                 CloudBox
               </h1>
               <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mt-1 shadow-md"></div>
             </div>
           </div>
-          <span className="cursor-pointer"  onClick={() => navigate("/login")}>
-          <button
-            className="
+          {!user && (
+            <span className="cursor-pointer" onClick={() => navigate("/login")}>
+              <button
+                className="
   bg-gradient-to-r from-blue-500 to-purple-600 
   hover:from-blue-600 hover:to-purple-700 
   text-white font-semibold 
@@ -57,11 +81,12 @@ function Navbar() {
   min-w-[80px]
   sm:min-w-[100px]
 "
-           onClick={() => navigate("/login")}
-          >
-            Login
-          </button>
-          </span>
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+            </span>
+          )}
         </div>
       </div>
     </nav>
